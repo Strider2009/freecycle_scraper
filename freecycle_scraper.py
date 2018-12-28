@@ -99,7 +99,7 @@ def get_offer(url):
     title = getattr(html.find(id="group_post").find('header').find_all('h2')[1], 'text', '').replace("OFFER: ", "")
     location = html.find(id='post_details').find_all('div')[0].text.replace("Location :", "")
     date = get_post_date(html) 
-    full_desc = html.find(id='group_post').find("p").text.lower()   
+    full_desc = html.find(id='group_post').find("p").text.lower().encode("utf-8")
     image_element = html.find(id='post_thumbnail')
     image_url = get_post_image_url(html)
     offer = Post(url, title, post_id, location, date, full_desc, image_url)
@@ -119,7 +119,7 @@ def get_offers(url):
         if 'OFFER' in tds[0].text:
             for td in tr.select('td')[1:2]:
                 href = td.a['href']
-                short_desc = td.a.text
+                short_desc = td.a.text.encode("utf-8")
                 offer = get_offer(href)
                 offers.add(offer)
     return offers
@@ -140,7 +140,7 @@ boards = [
     'https://groups.freecycle.org/group/FarehamUK/posts/offer',
     'https://groups.freecycle.org/group/WokingUK/posts/offer']
 
-keywords = ['printer','drill','tool','dewalt', 'saw', 'driver','router', 'hub', 'computer']
+keywords = ['printer','drill','tool','dewalt', 'saw', 'driver','router', 'hub', 'computer', 'network']
 
 
 for board in boards:
