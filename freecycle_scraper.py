@@ -96,7 +96,7 @@ def get_offer(url):
         raise Exception('Error retrieving content at {}'.format(url))
     html = BeautifulSoup(response, 'html.parser')
     post_id = html.find(id='group_post').find('header').find_all('h2')[0].text.replace("Post ID: ", "")
-    title = getattr(html.find(id="group_post").find('header').find_all('h2')[1], 'text', '').replace("OFFER: ", "")
+    title = getattr(html.find(id="group_post").find('header').find_all('h2')[1], 'text', '').replace("OFFER: ", "").encode("utf-8")
     location = html.find(id='post_details').find_all('div')[0].text.replace("Location :", "")
     date = get_post_date(html) 
     full_desc = html.find(id='group_post').find("p").text.lower().encode("utf-8")
