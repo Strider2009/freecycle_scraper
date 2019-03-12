@@ -1,4 +1,4 @@
-#!/usr/bin/env pythoni
+#!/usr/bin/env python
 import logging
 from requests import get 
 from requests.exceptions import RequestException
@@ -124,32 +124,29 @@ def get_offers(url):
                 offers.add(offer)
     return offers
 
+def load_array_from_file(path):
+    """
+    Load strings from file into array, spliting by line
+    """
+    text_file = open(path, "r")
+    strings = text_file.read().splitlines()
+    text_file.close()
+    return strings
 
 #logging.basicConfig(filename='output.log',level=logging.INFO)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-boards = [
-    'https://groups.freecycle.org/group/BordonAltonPetersfieldUK/posts/offer',
-    'https://groups.freecycle.org/group/Farnborough_AldershotUK/posts/offer',
-    'https://groups.freecycle.org/group/godalmingUK/posts/offer',
-    'https://groups.freecycle.org/group/GosportUK/posts/offer',
-    'https://groups.freecycle.org/group/GuildfordUK/posts/offer',
-    'https://groups.freecycle.org/group/HavantUK/posts/offer',
-    'https://groups.freecycle.org/group/PortsmouthUK/posts/offer',
-    'https://groups.freecycle.org/group/Farnham/posts/offer',
-    'https://groups.freecycle.org/group/FarehamUK/posts/offer',
-    'https://groups.freecycle.org/group/WokingUK/posts/offer']
 
-keywords = ['printer','drill','tool','dewalt', 'saw', 'driver','router', 'hub', 'computer', 'network']
+groups = load_array_from_file("groups.txt")
+keywords = load_array_from_file("keywords.txt")
 
-
-for board in boards:
+for group in groups:
     print("###############################################################")
     print("###############################################################")
-    print(board)
+    print(group)
     print("###############################################################")
     print("###############################################################")
-    offers = get_offers('{}?resultsperpage=100'.format(board))
+    offers = get_offers('{}?resultsperpage=100'.format(group))
     for offer in offers:
         if any(imap(offer.full_desc.__contains__, keywords) or imap(offer.short_desc.__contains__, keywords)):
             print(offer.title)
