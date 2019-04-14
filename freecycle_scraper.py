@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 import logging
-from requests import get 
+import requests 
+from requests import get, session
 from requests.exceptions import RequestException
 from contextlib import closing
 from bs4 import BeautifulSoup
 from itertools import imap
+import time
 
 class Post(object):
     image_url = ""
@@ -26,14 +28,14 @@ class Post(object):
 
 
 
-def simple_get(url):
+def simple_get(session, url):
     """
     Attempts to get the content at 'url' by making a HTTP GET request. 
     If the content-type of response is some kind of HTML/XML, return the 
     text content, otherwise return None. 
     """
     try:
-        with closing(get(url, stream=True)) as resp:
+        with closing(session.get(url, stream=True)) as resp:
             if is_good_response(resp):
                 return resp.content
             else:
@@ -87,11 +89,11 @@ def get_post_image_url(html):
     return image_url
     
 
-def get_offer(url):
+def get_offer(session, url):
     """
     Get the full description for a given post
     """
-    response = simple_get(url)
+    response = simple_get(session, url)
     if response is None:
         raise Exception('Error retrieving content at {}'.format(url))
     html = BeautifulSoup(response, 'html.parser')
@@ -105,11 +107,11 @@ def get_offer(url):
     offer = Post(url, title, post_id, location, date, full_desc, image_url)
     return offer
 
-def get_offers(url):
+def get_offers(session, url):
     """
     Get all offers on the page
     """
-    response = simple_get(url)
+    response = simple_get(session, url)
     if response is None:
         raise Exception('Error retrieving content at {}'.format(url))
     html = BeautifulSoup(response, 'html.parser')
@@ -120,7 +122,7 @@ def get_offers(url):
             for td in tr.select('td')[1:2]:
                 href = td.a['href']
                 short_desc = td.a.text.encode("utf-8")
-                offer = get_offer(href)
+                offer = get_offer(session, href)
                 offers.add(offer)
     return offers
 
@@ -139,14 +141,17 @@ logger = logging.getLogger(__name__)
 
 groups = load_array_from_file("groups.txt")
 keywords = load_array_from_file("keywords.txt")
+s = requests.session()
 
+
+start = time.time()
 for group in groups:
     print("###############################################################")
     print("###############################################################")
     print(group)
     print("###############################################################")
     print("###############################################################")
-    offers = get_offers('{}?resultsperpage=100'.format(group))
+    offers = get_offers(s, '{}?resultsperpage=100'.format(group))
     for offer in offers:
         if any(imap(offer.full_desc.__contains__, keywords) or imap(offer.short_desc.__contains__, keywords)):
             print(offer.title)
@@ -157,3 +162,6 @@ for group in groups:
             print(offer.full_desc)
             print(offer.url)
             print('---------------------------------------')
+
+end = time.time()
+print(end - start)
